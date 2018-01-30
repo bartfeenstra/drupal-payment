@@ -23,6 +23,11 @@ payment.payment.capture:
   route_name: entity.payment.capture_form
   title: 'Capture'
 
+payment.payment.refund:
+  base_route: entity.payment.canonical
+  route_name: entity.payment.refund_form
+  title: 'Refund'
+
 payment.payment_method.collection:
   base_route: payment.payment_method.collection
   route_name: payment.payment_method.collection
