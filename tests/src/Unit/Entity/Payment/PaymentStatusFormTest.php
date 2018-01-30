@@ -2,6 +2,11 @@
 
 namespace Drupal\Tests\payment\Unit\Entity\Payment;
 
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -78,6 +83,34 @@ class PaymentStatusFormTest extends UnitTestCase {
   protected $stringTranslation;
 
   /**
+   * The entity type bundle service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $entityTypeBundleInfo;
+
+  /**
+   * The time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $time;
+
+  /**
+   * The entity manager.
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $entityManager;
+
+  /**
+   * The form display.
+   *
+   * @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $formDisplay;
+
+  /**
    * The class under test.
    *
    * @var \Drupal\payment\Entity\Payment\PaymentStatusForm
@@ -111,7 +144,13 @@ class PaymentStatusFormTest extends UnitTestCase {
 
     $this->payment = $this->getMock(PaymentInterface::class);
 
-    $this->sut = new PaymentStatusForm($this->currentUser, $this->urlGenerator, $this->stringTranslation, $this->pluginSelectorManager, $this->paymentStatusPluginType->reveal());
+    $this->entityManager = $this->getMock(EntityManagerInterface::class);
+
+    $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class)->reveal();
+    $this->time = $this->prophesize(TimeInterface::class)->reveal();
+    $this->formDisplay = $this->prophesize(EntityFormDisplayInterface::class)->reveal();
+
+    $this->sut = new PaymentStatusForm($this->entityManager, $this->entityTypeBundleInfo, $this->time, $this->currentUser, $this->urlGenerator, $this->stringTranslation, $this->pluginSelectorManager, $this->paymentStatusPluginType->reveal());
     $this->sut->setEntity($this->payment);
   }
 
@@ -125,13 +164,17 @@ class PaymentStatusFormTest extends UnitTestCase {
 
     $container = $this->getMock(ContainerInterface::class);
     \Drupal::setContainer($container);
-    $map = array(
-      array('current_user', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->currentUser),
-      array('plugin.manager.plugin.plugin_selector', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->pluginSelectorManager),
-      array('plugin.plugin_type_manager', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $plugin_type_manager->reveal()),
-      array('string_translation', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->stringTranslation),
-      array('url_generator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->urlGenerator),
-    );
+    $map = [
+      ['current_user', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->currentUser],
+      ['plugin.manager.plugin.plugin_selector', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->pluginSelectorManager],
+      ['plugin.plugin_type_manager', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $plugin_type_manager->reveal()],
+      ['entity.manager', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->entityManager],
+      ['entity_type.bundle.info', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->entityTypeBundleInfo],
+      ['datetime.time', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->time],
+      ['string_translation', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->stringTranslation],
+      ['url_generator', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->urlGenerator],
+    ];
+
     $container->expects($this->any())
       ->method('get')
       ->willReturnMap($map);
@@ -164,6 +207,10 @@ class PaymentStatusFormTest extends UnitTestCase {
     $this->payment->expects($this->any())
       ->method('language')
       ->willReturn($language);
+    $entity_type = $this->getMock(EntityTypeInterface::class);
+    $this->payment->expects($this->any())
+      ->method('getEntityType')
+      ->willReturn($entity_type);
 
     $this->pluginSelectorManager->expects($this->once())
       ->method('createInstance')
@@ -172,6 +219,12 @@ class PaymentStatusFormTest extends UnitTestCase {
     $plugin_selector_form = [
       'foo' => $this->randomMachineName(),
     ];
+
+    $form = [
+      'langcode' => [],
+    ];
+    $form_state = new FormState();
+    $this->sut->setFormDisplay($this->formDisplay, $form_state);
 
     $this->pluginSelector->expects($this->atLeastOnce())
       ->method('buildSelectorForm')

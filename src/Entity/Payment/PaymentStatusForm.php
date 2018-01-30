@@ -2,7 +2,10 @@
 
 namespace Drupal\payment\Entity\Payment;
 
-use Drupal\Core\Entity\EntityForm;
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -17,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides the payment status update form.
  */
-class PaymentStatusForm extends EntityForm {
+class PaymentStatusForm extends ContentEntityForm {
 
   /**
    * The current user account.
@@ -53,7 +56,8 @@ class PaymentStatusForm extends EntityForm {
    * @param \Drupal\plugin\PluginType\PluginTypeInterface $plugin_type
    *   The "payment_status" plugin type.
    */
-  function __construct(AccountInterface $current_user, UrlGeneratorInterface $url_generator, TranslationInterface $string_translation, PluginSelectorManagerInterface $plugin_selector_manager, PluginTypeInterface $plugin_type) {
+  function __construct(EntityManagerInterface $entity_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, TimeInterface $time, AccountInterface $current_user, UrlGeneratorInterface $url_generator, TranslationInterface $string_translation, PluginSelectorManagerInterface $plugin_selector_manager, PluginTypeInterface $plugin_type) {
+    parent::__construct($entity_manager, $entity_type_bundle_info, $time);
     $this->currentUser = $current_user;
     $this->paymentStatusPluginType = $plugin_type;
     $this->pluginSelectorManager = $plugin_selector_manager;
@@ -68,7 +72,7 @@ class PaymentStatusForm extends EntityForm {
     /** @var \Drupal\plugin\PluginType\PluginTypeManagerInterface $plugin_type_manager */
     $plugin_type_manager = $container->get('plugin.plugin_type_manager');
 
-    return new static($container->get('current_user'), $container->get('url_generator'), $container->get('string_translation'), $container->get('plugin.manager.plugin.plugin_selector'), $plugin_type_manager->getPluginType('payment_status'));
+    return new static($container->get('entity.manager'), $container->get('entity_type.bundle.info'), $container->get('datetime.time'), $container->get('current_user'), $container->get('url_generator'), $container->get('string_translation'), $container->get('plugin.manager.plugin.plugin_selector'), $plugin_type_manager->getPluginType('payment_status'));
   }
 
   /**
