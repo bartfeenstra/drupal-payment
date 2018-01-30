@@ -201,7 +201,6 @@ class PaymentListBuilder extends EntityListBuilder implements PaymentListBuilder
       $operations['update_status'] = array(
         'title' => $this->t('Update status'),
         'attributes' => array(
-          'class' => array('use-ajax'),
           'data-accepts' => 'application/vnd.drupal-modal',
         ),
         'query' => array(
@@ -214,7 +213,6 @@ class PaymentListBuilder extends EntityListBuilder implements PaymentListBuilder
       $operations['capture'] = array(
           'title' => $this->t('Capture'),
           'attributes' => array(
-            'class' => array('use-ajax'),
             'data-accepts' => 'application/vnd.drupal-modal',
           ),
           'query' => array(
@@ -227,7 +225,6 @@ class PaymentListBuilder extends EntityListBuilder implements PaymentListBuilder
       $operations['refund'] = array(
           'title' => $this->t('Refund'),
           'attributes' => array(
-            'class' => array('use-ajax'),
             'data-accepts' => 'application/vnd.drupal-modal',
           ),
           'query' => array(
