@@ -132,6 +132,7 @@ class PaymentFormWebTest extends WebTestBase {
     // This is supposed to be the first and only payment.
     /** @var \Drupal\payment\Entity\PaymentInterface $payment */
     $payment = $this->paymentStorage->load(1);
+    var_dump($payment->getPaymentType());
     if ($this->assertTrue((bool) $payment)) {
       $this->assertTrue($payment->getPaymentType() instanceof PaymentForm);
       $this->assertIdentical($payment->getPaymentStatus()->getPluginId(), $this->executeStatusPluginId);

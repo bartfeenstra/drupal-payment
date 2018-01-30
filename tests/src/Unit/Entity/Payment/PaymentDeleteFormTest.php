@@ -2,7 +2,9 @@
 
 namespace Drupal\Tests\payment\Unit\Entity\Payment {
 
+  use Drupal\Component\Datetime\TimeInterface;
   use Drupal\Core\Entity\EntityManagerInterface;
+  use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
   use Drupal\Core\Form\FormStateInterface;
   use Drupal\Core\StringTranslation\TranslatableMarkup;
   use Drupal\Core\Url;
@@ -48,6 +50,20 @@ namespace Drupal\Tests\payment\Unit\Entity\Payment {
     protected $stringTranslation;
 
     /**
+     * The entity type bundle service.
+     *
+     * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $entityTypeBundleInfo;
+
+    /**
+     * The time service.
+     *
+     * @var \Drupal\Component\Datetime\TimeInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $time;
+
+    /**
      * The class under test.
      *
      * @var \Drupal\payment\Entity\Payment\PaymentDeleteForm
@@ -65,8 +81,10 @@ namespace Drupal\Tests\payment\Unit\Entity\Payment {
       $this->payment = $this->getMock(PaymentInterface::class);
 
       $this->stringTranslation = $this->getStringTranslationStub();
+      $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class)->reveal();
+      $this->time = $this->prophesize(TimeInterface::class)->reveal();
 
-      $this->sut = new PaymentDeleteForm($this->entityManager, $this->stringTranslation, $this->logger);
+      $this->sut = new PaymentDeleteForm($this->entityManager, $this->entityTypeBundleInfo, $this->time, $this->stringTranslation, $this->logger);
       $this->sut->setEntity($this->payment);
     }
 
@@ -78,6 +96,8 @@ namespace Drupal\Tests\payment\Unit\Entity\Payment {
       $container = $this->getMock(ContainerInterface::class);
       $map = [
         ['entity.manager', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->entityManager],
+        ['entity_type.bundle.info', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->entityTypeBundleInfo],
+        ['datetime.time', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->time],
         ['payment.logger', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->logger],
         ['string_translation', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->stringTranslation],
       ];

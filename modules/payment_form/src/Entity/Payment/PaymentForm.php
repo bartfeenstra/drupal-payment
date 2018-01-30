@@ -2,9 +2,12 @@
 
 namespace Drupal\payment_form\Entity\Payment;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
@@ -45,13 +48,17 @@ class PaymentForm extends ContentEntityForm {
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle info service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    * @param \Drupal\Core\Session\AccountInterface $current_user
    * @param \Drupal\plugin\Plugin\Plugin\PluginSelector\PluginSelectorManagerInterface $plugin_selector_manager
    * @param \Drupal\plugin\PluginType\PluginTypeInterface $payment_method_type
    */
-  public function __construct(EntityManagerInterface $entity_manager, TranslationInterface $string_translation, AccountInterface $current_user, PluginSelectorManagerInterface $plugin_selector_manager, PluginTypeInterface $payment_method_type) {
-    parent::__construct($entity_manager);
+  public function __construct(EntityManagerInterface $entity_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, TimeInterface $time, TranslationInterface $string_translation, AccountInterface $current_user, PluginSelectorManagerInterface $plugin_selector_manager, PluginTypeInterface $payment_method_type) {
+    parent::__construct($entity_manager, $entity_type_bundle_info, $time);
     $this->currentUser = $current_user;
     $this->paymentMethodType = $payment_method_type;
     $this->pluginSelectorManager = $plugin_selector_manager;
@@ -66,7 +73,7 @@ class PaymentForm extends ContentEntityForm {
     /** @var \Drupal\plugin\PluginType\PluginTypeManagerInterface $plugin_type_manager */
     $plugin_type_manager = $container->get('plugin.plugin_type_manager');
 
-    return new static($container->get('entity.manager'), $container->get('string_translation'), $container->get('current_user'), $container->get('plugin.manager.plugin.plugin_selector'), $plugin_type_manager->getPluginType('payment_method'));
+    return new static($container->get('entity.manager'), $container->get('entity_type.bundle.info'), $container->get('datetime.time'), $container->get('string_translation'), $container->get('current_user'), $container->get('plugin.manager.plugin.plugin_selector'), $plugin_type_manager->getPluginType('payment_method'));
   }
 
   /**

@@ -2,9 +2,11 @@
 
 namespace Drupal\Tests\payment_form\Unit\Entity\Payment;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Session\AccountInterface;
@@ -110,6 +112,20 @@ class PaymentFormTest extends UnitTestCase {
   protected $stringTranslation;
 
   /**
+   * The entity type bundle service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $entityTypeBundleInfo;
+
+  /**
+   * The time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $time;
+
+  /**
    * The class under test.
    *
    * @var \Drupal\payment_form\Entity\Payment\PaymentForm
@@ -149,7 +165,10 @@ class PaymentFormTest extends UnitTestCase {
 
     $this->configFactory = $this->getConfigFactoryStub($this->configFactoryConfiguration);
 
-    $this->sut = new PaymentForm($this->entityManager, $this->stringTranslation, $this->currentUser, $this->pluginSelectorManager, $this->paymentMethodType->reveal());
+    $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class)->reveal();
+    $this->time = $this->prophesize(TimeInterface::class)->reveal();
+
+    $this->sut = new PaymentForm($this->entityManager, $this->entityTypeBundleInfo, $this->time, $this->stringTranslation, $this->currentUser, $this->pluginSelectorManager, $this->paymentMethodType->reveal());
     $this->sut->setConfigFactory($this->configFactory);
     $this->sut->setEntity($this->payment);
   }
@@ -166,6 +185,9 @@ class PaymentFormTest extends UnitTestCase {
     $container = $this->getMock(ContainerInterface::class);
     $map = [
       ['current_user', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->currentUser],
+      ['entity.manager', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->entityManager],
+      ['entity_type.bundle.info', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->entityTypeBundleInfo],
+      ['datetime.time', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->time],
       ['entity.manager', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->entityManager],
       ['plugin.manager.plugin.plugin_selector', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $this->pluginSelectorManager],
       ['plugin.plugin_type_manager', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $plugin_type_manager->reveal()],
@@ -203,7 +225,7 @@ class PaymentFormTest extends UnitTestCase {
       ->willReturn($payment_type);
     $entity_type = $this->getMock(EntityTypeInterface::class);
     $this->payment->expects($this->any())
-      ->method('entityInfo')
+      ->method('getEntityType')
       ->willReturn($entity_type);
 
     $form = [

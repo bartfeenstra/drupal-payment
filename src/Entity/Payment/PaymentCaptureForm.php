@@ -2,8 +2,10 @@
 
 namespace Drupal\payment\Entity\Payment;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -18,11 +20,15 @@ class PaymentCaptureForm extends ContentEntityConfirmFormBase {
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle info service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *    The string translator.
    */
-  function __construct(EntityManagerInterface $entity_manager, TranslationInterface $string_translation) {
-    parent::__construct($entity_manager);
+  function __construct(EntityManagerInterface $entity_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, TimeInterface $time, TranslationInterface $string_translation) {
+    parent::__construct($entity_manager, $entity_type_bundle_info, $time);
     $this->stringTranslation = $string_translation;
   }
 
@@ -30,7 +36,7 @@ class PaymentCaptureForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('entity.manager'), $container->get('string_translation'));
+    return new static($container->get('entity.manager'), $container->get('entity_type.bundle.info'), $container->get('datetime.time'), $container->get('string_translation'));
   }
 
   /**
