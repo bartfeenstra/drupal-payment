@@ -2,7 +2,7 @@
 
 namespace Drupal\payment_reference\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\FieldItemList;
+use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
  * This class removes the functionality to add a default value through the user
  * interface.
  */
-class PaymentReferenceItemList extends FieldItemList {
+class PaymentReferenceItemList extends EntityReferenceFieldItemList {
 
   /**
    * {@inheritdoc}
