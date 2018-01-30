@@ -146,7 +146,10 @@ class PaymentReference extends EntityReferenceItem {
       /** @var \Drupal\Core\Entity\ContentEntityInterface $unchanged_entity */
       $unchanged_entity = $entity_storage->loadUnchanged($current_entity->id());
       if ($unchanged_entity) {
-        $unchanged_payment_id = $unchanged_entity->get($this->getFieldDefinition()->getName())->get($this->name)->get('target_id')->getValue();
+        $unchanged_field = $unchanged_entity->get($this->getFieldDefinition()->getName());
+        if (!$unchanged_field->isEmpty()) {
+          $unchanged_payment_id = $unchanged_field->get($this->name)->get('target_id')->getValue();
+        }
       }
     }
     $current_payment_id = $this->get('target_id')->getValue();
