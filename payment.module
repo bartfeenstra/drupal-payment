@@ -96,6 +96,14 @@ function payment_module_implements_alter(array &$implementations, $hook) {
     // function.
     unset($implementations['commerce']);
   }
+  if (in_array($hook, array('payment_update', 'payment_insert'))) {
+    // Move our implementations of hook_payment_update() and
+    // hook_payment_insert() to the top. This way all other implementations can
+    // rely on the line items and status items being already saved.
+    $group = $implementations['payment'];
+    unset($implementations['payment']);
+    $implementations = array('payment' => $group) + $implementations;
+  }
 }
 
 /**
@@ -1159,4 +1167,18 @@ function _payment_own_overview_views_handler_access($account = NULL) {
   }
 
   return user_access('payment.payment.view.any') || user_access('payment.payment.view.own') && $account->uid == arg(1);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for payment.
+ */
+function payment_payment_update($payment) {
+  entity_get_controller('payment')->saveAttachedData($payment);
+}
+
+/**
+ * Implements hook_ENTITY_UPDATE_insert() for payment.
+ */
+function payment_payment_insert($payment) {
+  entity_get_controller('payment')->saveAttachedData($payment);
 }

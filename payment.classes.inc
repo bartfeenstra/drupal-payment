@@ -394,7 +394,16 @@ class PaymentEntityController extends EntityAPIController {
     $payment->pmid = $payment->method->pmid;
     $return = parent::save($payment, $transaction);
     unset($payment->pmid);
+    return $return;
+  }
 
+  /**
+   * Save the line items and payment status items if needed.
+   *
+   * @param Payment $payment
+   *   The payment object.
+   */
+  function saveAttachedData($payment) {
     // Save line items.
     foreach ($payment->line_items as $line_item) {
       db_merge('payment_line_item')
@@ -435,8 +444,6 @@ class PaymentEntityController extends EntityAPIController {
         ));
         $query->execute();
     }
-
-    return $return;
   }
 
   /**
