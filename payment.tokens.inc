@@ -12,15 +12,21 @@ function payment_token_info() {
   // Fake a hierarchy, because payment:line_items has no direct contents and a
   // real hierarchy would not show up in Rules' token browser.
   $token = array();
+  $type = array(
+    'name' => t('Payment'),
+    'description' => t('Tokens related to payment.'),
+  );
+
   foreach (payment_line_items_info() as $info) {
-    $token['payment'][PAYMENT_LINE_ITEM_TOKEN_PREFIX . $info->name] = array(
+    $token[PAYMENT_LINE_ITEM_TOKEN_PREFIX . $info->name] = array(
       'name' => $info->title,
       'description' => t('The total amount of all line items of this type.'),
     );
   }
 
   return array(
-    'tokens' => $token,
+    'types' => array('payment' => $type),
+    'tokens' => array('payment' => $token),
   );
 }
 
