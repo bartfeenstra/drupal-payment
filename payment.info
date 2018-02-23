@@ -3,6 +3,7 @@ description = "Allows payments to be made using any of the available payment met
 core = 7.x
 configure = admin/config/services/payment
 dependencies[] = entity
+test_dependencies[] = views:views
 package = Payment
 files[] = payment.classes.inc
 files[] = payment.generate.inc
